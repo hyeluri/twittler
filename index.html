@@ -1,27 +1,141 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="jquery.js"></script>
-    <script src="data_generator.js"></script>
-  </head>
-  <body>
-    <script>
+<head>
+	<script src="jquery.js"></script>
+	<script src="data_generator.js"></script>
+	<script src="pretty.js"></script>
+</head>
+<body style="background:url('background.jpg')">
 
-      $(document).ready(function(){
-        var $body = $('body');
-        $body.html('');
+	<div style="">
+		<div style="display:inline">
+			<img src="twittler.png">
+		</div>
+		<div style="float:right; margin:30px;">
+			<input id="tweetThis" type="text" placeholder="" value style="font-size:20px;">
+			<button id="tweetBtn" type="button" value="Tweet This!" style="padding:13px;">Tweet This!</button>
+		</div>
+	</div>
 
-        var index = streams.home.length - 1;
-        while(index >= 0){
-          var tweet = streams.home[index];
-          var $tweet = $('<div></div>');
-          $tweet.text('@' + tweet.user + ': ' + tweet.message);
-          $tweet.appendTo($body);
-          index -= 1;
-        }
+	<div style="padding-left:70px; display:inline-block;">
+		<div >
+			<div style="float:left; height:650px; width:50%; margin: 0 auto; padding:10px 10px;">
+				<p >
+					<span style="font-size: 22px;">All Tweets:</span>
+					<button id="refreshBtn" style="float:right; padding:10px;" type="button">Refresh</button>
+				</p>
+				<div id="tweetArea" style="border:solid 11px #6EACD5; background:#8CCFDB;height:85%; overflow-y:auto; margin: 0 auto; padding:10px 10px; display:block; border-radius:20px;">
 
-      });
+				</div>
 
-    </script>
-  </body>
+			</div>
+			<div id="userTweetBox" style="display:none; height:650px; float:left; width:40%; padding: 10px 10px; margin-left:20px;">
+				<p style="	">
+					<span id="user" style="font-size: 22px;">User Tweets</span>
+				</p>
+				<div id="userTweets" style="border: solid 11px #D6DD81; background: #F6F79F; height:85%; overflow-y:auto; margin: 0 auto; padding:10px 20px; display:block; border-radius:20px;">
+				</div>	
+			</div>
+		</div>
+	</div>
+	<script>
+
+		(function(){
+
+				//used to clear refresh interval for last user on the right side of page
+				var userTweetRefresh;
+
+			App = {
+
+
+				start: function(){
+					this.$tweetArea = $('#tweetArea');
+					this.$tweetArea.html('');
+					this.$userTweetsArea = $('#userTweets');
+
+					this.addEvents();
+				},
+
+				addEvents: function(){
+					$(document)
+					//.on("click", "button", $.proxy(this.handleUpdate(streams.home), this))
+					.on("click","#refreshBtn", function(){App.showAllTweets();})
+					.on("click", ".user", $.proxy(this.handleUserClick, this))
+					.on("click", "#tweetBtn", function(){App.submitTweet();});
+					//*****not sure why this doesn't work: *********
+					//.on("click", ".user", function(){this.handleUserClick();});
+
+				},
+
+				//main func for displaying tweet streams, passing stream data and which area to display the stream(either under All streams or under User stream)
+				handleUpdate: function(stream,tweetArea){
+	
+
+					var index = stream.length - 1;
+					
+					//should work but doesn't(does work in console):
+					//this.$tweetArea.html('');
+					tweetArea.html('');
+
+					while(index >= 0){
+						var tweet = stream[index];
+						var $tweet = $('<div></div>');
+						var timeStamp = prettyDate(tweet.created_at);
+						$tweet.html('<a href="#" class="user" data-user="'+tweet.user+'">@' + tweet.user + ':</a> ' + tweet.message + '<span style="color:red;"> Created: ' + timeStamp+'</span>');
+						$tweet.appendTo( 	tweetArea);
+						index -= 1;
+					};
+				},
+
+				handleUserClick: function(e){
+					var el = $(e.target);
+					this.showUserTweets(el);
+				},
+
+				//left side of page, shows all tweets
+				showAllTweets: function(){
+					App.handleUpdate(streams.home,App.$tweetArea);
+				},
+
+				//right side of page shows the clicked user's tweet stream
+				showUserTweets: function(el){
+					var username = el.data("user");
+					this.showAllTweets();
+					$("#userTweetBox").show();
+					$("#user").text(username);
+					this.handleUpdate(streams.users[username], this.$userTweetsArea);
+					
+					//see not above about interval clearing not working
+					clearInterval(userTweetRefresh);
+
+					//refresh the user tweet section every three seconds, but currently, not correctly 
+					//clearing last interval set, so multiple user's tweet streams are refreshing constantly
+					userTweetRefresh = setInterval(this.handleUpdate,3000,streams.users[username], App.$userTweetsArea);
+			},
+
+				//to write tweets, get message value from html input box
+				submitTweet: function(){
+					var tweetMsg = $("#tweetThis").val();
+					writeTweet(tweetMsg);
+				}
+			};
+
+
+			$(document).ready(function(){
+				//variable for user tweet refresh interval. Need to clear after username clicked each time
+				var userTweetRefresh;
+
+				App.start();
+				App.showAllTweets();
+
+				window.setInterval(App.showAllTweets, 3000);
+			});
+
+
+
+		})(jQuery);
+
+//}());
+</script>
+</body>
 </html>

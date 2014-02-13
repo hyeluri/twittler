@@ -11,7 +11,9 @@ streams.users.shawndrost = [];
 streams.users.sharksforcheap = [];
 streams.users.mracus = [];
 streams.users.douglascalhoun = [];
+streams.users.visitor = [];
 window.users = Object.keys(streams.users);
+window.visitor = streams.users.visitor;
 
 // utility function for adding tweets to our data structures
 var addTweet = function(newTweet){
@@ -40,7 +42,7 @@ var randomMessage = function(){
 // generate random tweets on a random schedule
 var generateRandomTweet = function(){
   var tweet = {};
-  tweet.user = randomElement(users);
+  tweet.user = randomElement(users.slice(0,4));
   tweet.message = randomMessage();
   tweet.created_at = new Date();
   addTweet(tweet);
@@ -63,7 +65,10 @@ var writeTweet = function(message){
     throw new Error('set the global visitor property!');
   }
   var tweet = {};
-  tweet.user = visitor;
+  //why dosen't this work:
+  //tweet.user = stream.users.visitor;
+  tweet.user = users[4];
   tweet.message = message;
+  tweet.created_at = new Date();
   addTweet(tweet);
 };
