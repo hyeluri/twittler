@@ -42,11 +42,7 @@
 
 		(function(){
 
-				//used to clear refresh interval for last user on the right side of page
-				var userTweetRefresh;
-
 			App = {
-
 
 				start: function(){
 					this.$tweetArea = $('#tweetArea');
@@ -69,8 +65,6 @@
 
 				//main func for displaying tweet streams, passing stream data and which area to display the stream(either under All streams or under User stream)
 				handleUpdate: function(stream,tweetArea){
-	
-
 					var index = stream.length - 1;
 					
 					//should work but doesn't(does work in console):
